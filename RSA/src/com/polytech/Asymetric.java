@@ -44,7 +44,7 @@ public class Asymetric{
 					FileOutputStream out = new FileOutputStream(new File(argv[1]));
 					out.write(aSignature);
 					out.close();
-			
+		
 				// BOB CHECKS THE ALICE SIGNATURE
 				System.out.println("Bob signature verification == \n"+Bob.checkSignature(aMessage, aSignature, Alice.thePublicKey));
 				
