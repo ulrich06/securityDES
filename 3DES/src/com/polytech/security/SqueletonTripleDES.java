@@ -119,7 +119,6 @@ public class SqueletonTripleDES{
 				// convert to char and display it
 				message += (char) content;
 			}
-			
 			byte[] plain = message.getBytes();
 			
 			// CIPHERING     
@@ -129,13 +128,7 @@ public class SqueletonTripleDES{
 				// write encrypted file
 			
 			byte[] ciphered = cipher3.doFinal(cipher2.doFinal(cipher1.doFinal(plain)));
-			System.out.print("Cipher function - Ciphered bytes : ");
 
-			for (int i=0; i < ciphered.length; i ++ ){
-				System.out.print(ciphered[i] + " ");
-
-			}
-			System.out.println();
 			// WRITE THE ENCRYPTED DATA IN OUT
 			out.write(ciphered);
 			out.close();
@@ -169,41 +162,33 @@ public class SqueletonTripleDES{
 				// FOR DECRYPTION
 				// WITH THE SECOND GENERATED DES KEY
 			Cipher cipher2 = Cipher.getInstance(CipherInstanceName);
-			cipher2.init(Cipher.DECRYPT_MODE, (SecretKey) Parameters.get(1));
+			cipher2.init(Cipher.ENCRYPT_MODE, (SecretKey) Parameters.get(1));
 			// CREATE A DES CIPHER OBJECT WITH DES/ECB/PKCS5PADDING FOR ENCRYPTION
 				// WITH CipherInstanceName
 				// FOR ENCRYPTION
 				// WITH THE FIRST GENERATED DES KEY
 			Cipher cipher3 = Cipher.getInstance(CipherInstanceName);
-			cipher3.init(Cipher.ENCRYPT_MODE, (SecretKey) Parameters.get(0));
+			cipher3.init(Cipher.DECRYPT_MODE, (SecretKey) Parameters.get(0));
 			// GET THE ENCRYPTED DATA FROM IN
-			
 			
 			int content;
 			String message = "";
 			while((content = in.read()) != -1) {
 				// convert to char and display it
-				System.out.println(content);
 				message += (char) content;
 			}
 			byte[] cyphered = message.getBytes();
 
-			System.out.print("Decrypt function - Ciphered bytes : ");
-
-			for (int i=0; i < cyphered.length; i ++ ){
-				System.out.print(cyphered[i] + " ");
-
-			}
-			System.out.println();
 
 			// DECIPHERING     
 				// DECIPHER WITH THE THIRD KEY
 				// 	CIPHER WITH THE SECOND KEY
 				// 	DECIPHER WITH THE FIRST KEY
-			byte[] plain = cipher1.doFinal(cipher2.doFinal(cipher3.doFinal(cyphered)));
-
+			//byte[] plain = cipher1.doFinal(cipher2.doFinal(cipher3.doFinal(cyphered)));
+			byte[] plain = cipher3.doFinal(cipher2.doFinal(cipher1.doFinal(cyphered)));
 			// WRITE THE PLAIN DATA IN OUT
 			
+			out.write(plain);
 			out.close();
 			
 		}catch(Exception e){
