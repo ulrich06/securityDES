@@ -1,11 +1,13 @@
 package com.polytech;
 
+import java.lang.reflect.Array;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.util.Arrays;
 import javax.crypto.Cipher;
 
 public class Entity {
@@ -143,7 +145,7 @@ public class Entity {
 			// process the digest
 			byte[] digest = md5.digest(aMessage);
 			
-			return digest.equals(signDecrypt);
+			return Arrays.equals(digest, signDecrypt);
 
 		}catch(Exception e){
 			System.out.println("Verify signature error");
