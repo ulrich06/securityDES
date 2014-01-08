@@ -33,7 +33,7 @@ public class SqueletonTripleDES{
 					  			new FileInputStream(new File(argv[1])),  	// clear text file 
 				   	  			new FileOutputStream(new File(argv[2])), 	// file encrypted
 				   	  			"DES", 										// KeyGeneratorName
-				   	  			"DES/ECB/NoPadding"); 						// CipherName 
+				   	  			"DES/ECB/NoPadding"); 						// CipherName
 				  	// decrypt EBC mode
 				  	the3DES.decryptECB(Parameters,				 			// the 3 DES keys
 				  				new FileInputStream(new File(argv[2])),  	// the encrypted file 
@@ -76,6 +76,7 @@ public class SqueletonTripleDES{
 	/**
 	 * 3DES ECB Encryption
 	 */
+
 	private Vector encryptECB(FileInputStream in, 
 							FileOutputStream out, 
 							String KeyGeneratorInstanceName, 
@@ -111,27 +112,26 @@ public class SqueletonTripleDES{
 			Cipher cipher3 = Cipher.getInstance(CipherInstanceName);
 			cipher3.init(Cipher.ENCRYPT_MODE, skList.get(2));
 
-			// GET THE MESSAGE TO BE ENCRYPTED FROM IN 
-			int content;
-			String message = "";
-			
-			while((content = in.read()) != -1) {
-				// convert to char and display it
-				message += (char) content;
-			}
-			byte[] plain = message.getBytes();
-			
-			// CIPHERING     
-				// CIPHER WITH THE FIRST KEY
-				// DECIPHER WITH THE SECOND KEY
-				// CIPHER WITH THE THIRD KEY
-				// write encrypted file
-			
-			byte[] ciphered = cipher3.doFinal(cipher2.doFinal(cipher1.doFinal(plain)));
+			// GET THE MESSAGE TO BE ENCRYPTED FROM IN
+            // CIPHERING
+            // CIPHER WITH THE FIRST KEY
+            // DECIPHER WITH THE SECOND KEY
+            // CIPHER WITH THE THIRD KEY
 
-			// WRITE THE ENCRYPTED DATA IN OUT
-			out.write(ciphered);
-			out.close();
+            CipherInputStream cis = new CipherInputStream(in, cipher1);
+            CipherInputStream cis2 = new CipherInputStream(cis,cipher2);
+            CipherInputStream cis3 = new CipherInputStream(cis2, cipher3);
+            // write encrypted file
+            byte[] bytes = new byte[64];
+            int numBytes;
+            while ((numBytes = cis3.read(bytes)) != -1) {
+                out.write(bytes, 0, numBytes);
+            }
+            out.flush();
+            out.close();
+            cis.close();
+            cis2.close();
+            cis3.close();
 			// return the DES keys list generated		
 			return skList;
 			
@@ -169,27 +169,21 @@ public class SqueletonTripleDES{
 				// WITH THE FIRST GENERATED DES KEY
 			Cipher cipher3 = Cipher.getInstance(CipherInstanceName);
 			cipher3.init(Cipher.DECRYPT_MODE, (SecretKey) Parameters.get(0));
-			// GET THE ENCRYPTED DATA FROM IN
-			
-			int content;
-			String message = "";
-			while((content = in.read()) != -1) {
-				// convert to char and display it
-				message += (char) content;
-			}
-			byte[] cyphered = message.getBytes();
 
+            // WRITE THE PLAIN DATA IN OUT
+            CipherOutputStream cos2 = new CipherOutputStream(out, cipher3);
+            CipherOutputStream cos1 = new CipherOutputStream(cos2, cipher2);
+            CipherOutputStream cos = new CipherOutputStream(cos1, cipher1);
 
-			// DECIPHERING     
-				// DECIPHER WITH THE THIRD KEY
-				// 	CIPHER WITH THE SECOND KEY
-				// 	DECIPHER WITH THE FIRST KEY
-			//byte[] plain = cipher1.doFinal(cipher2.doFinal(cipher3.doFinal(cyphered)));
-			byte[] plain = cipher3.doFinal(cipher2.doFinal(cipher1.doFinal(cyphered)));
-			// WRITE THE PLAIN DATA IN OUT
-			
-			out.write(plain);
-			out.close();
+            // GET THE ENCRYPTED DATA FROM IN
+            byte[] bytes = new byte[64];
+            int numBytes;
+            while ((numBytes = in.read(bytes)) != -1) {
+                cos.write(bytes, 0, numBytes);
+            }
+            cos.flush();
+            cos.close();
+            in.close();
 			
 		}catch(Exception e){
 			e.printStackTrace();
