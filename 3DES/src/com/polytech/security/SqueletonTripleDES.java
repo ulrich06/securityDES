@@ -203,33 +203,72 @@ public class SqueletonTripleDES{
 		
 			// GENERATE 3 DES KEYS
 			// GENERATE THE IV
-		
-			// CREATE A DES CIPHER OBJECT 
+
+			// CREATE A DES CIPHER OBJECT
 				// WITH CipherInstanceName
-				// FOR ENCRYPTION 
+				// FOR ENCRYPTION
 				// WITH THE FIRST GENERATED DES KEY
-			
-			// CREATE A DES CIPHER OBJECT 
+
+			// CREATE A DES CIPHER OBJECT
 				// WITH CipherInstanceName
 				// FOR DECRYPTION
 				// WITH THE SECOND GENERATED DES KEY
-				
-			// CREATE A DES CIPHER OBJECT 
-				// WITH CipherInstanceName 
+
+			// CREATE A DES CIPHER OBJECT
+				// WITH CipherInstanceName
 				// FOR ENCRYPTION
 				// WITH THE THIRD GENERATED DES KEY
-				
-			// GET THE DATA TO BE ENCRYPTED FROM IN 
-			
-			// CIPHERING     
+
+			// GET THE DATA TO BE ENCRYPTED FROM IN
+
+			// CIPHERING
 				// CIPHER WITH THE FIRST KEY
 				// DECIPHER WITH THE SECOND KEY
 				// CIPHER WITH THE THIRD KEY
 
 			// WRITE THE ENCRYPTED DATA IN OUT
-			
-			// return the DES keys list generated		
-			return null;
+
+			// return the DES keys list generated
+            // GENERATE 3 DES KEYS
+           // <SecretKey>
+            KeyGenerator kg = KeyGenerator.getInstance(KeyGeneratorInstanceName);
+
+            Vector pamList = new Vector();
+            pamList.add(kg.generateKey());
+            pamList.add(new IvParameterSpec(new byte[8]));
+            pamList.add(kg.generateKey());
+            pamList.add(new IvParameterSpec(new byte[8]));
+            pamList.add(kg.generateKey());
+            pamList.add(new IvParameterSpec(new byte[8]));
+
+
+            Cipher cipher1 = Cipher.getInstance(CipherInstanceName);
+            cipher1.init(Cipher.ENCRYPT_MODE, (SecretKey) pamList.get(0),(IvParameterSpec) pamList.get(1));
+
+
+            Cipher cipher2 = Cipher.getInstance(CipherInstanceName);
+            cipher2.init(Cipher.DECRYPT_MODE, (SecretKey) pamList.get(2),(IvParameterSpec) pamList.get(3));
+
+
+            Cipher cipher3 = Cipher.getInstance(CipherInstanceName);
+            cipher3.init(Cipher.ENCRYPT_MODE,(SecretKey) pamList.get(4),(IvParameterSpec) pamList.get(5));
+
+            CipherInputStream cis = new CipherInputStream(in, cipher1);
+            CipherInputStream cis2 = new CipherInputStream(cis,cipher2);
+            CipherInputStream cis3 = new CipherInputStream(cis2, cipher3);
+
+            byte[] bytes = new byte[64];
+            int numBytes;
+            while ((numBytes = cis3.read(bytes)) != -1) {
+                out.write(bytes, 0, numBytes);
+            }
+            out.flush();
+            out.close();
+            cis.close();
+            cis2.close();
+            cis3.close();
+
+            return pamList;
 			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -269,7 +308,32 @@ public class SqueletonTripleDES{
 				// 	DECIPHER WITH THE FIRST KEY
 
 			// WRITE THE DECRYPTED DATA IN OUT
-			
+            // CREATE A DES CIPHER OBJECT
+            // WITH CipherInstanceName
+            // FOR DECRYPTION
+            // WITH THE THIRD GENERATED DES KEY
+            Cipher cipher1 = Cipher.getInstance(CipherInstanceName);
+            cipher1.init(Cipher.DECRYPT_MODE, (SecretKey) Parameters.get(4),(IvParameterSpec) Parameters.get(5));
+
+            Cipher cipher2 = Cipher.getInstance(CipherInstanceName);
+            cipher2.init(Cipher.ENCRYPT_MODE, (SecretKey) Parameters.get(2),(IvParameterSpec) Parameters.get(3));
+
+            Cipher cipher3 = Cipher.getInstance(CipherInstanceName);
+            cipher3.init(Cipher.DECRYPT_MODE, (SecretKey) Parameters.get(0),(IvParameterSpec) Parameters.get(1));
+
+            CipherOutputStream cos2 = new CipherOutputStream(out, cipher3);
+            CipherOutputStream cos1 = new CipherOutputStream(cos2, cipher2);
+            CipherOutputStream cos = new CipherOutputStream(cos1, cipher1);
+
+            byte[] bytes = new byte[64];
+            int numBytes;
+            while ((numBytes = in.read(bytes)) != -1) {
+                cos.write(bytes, 0, numBytes);
+            }
+            cos.flush();
+            cos.close();
+            in.close();
+
 		}catch(Exception e){
 			e.printStackTrace();
 		}
